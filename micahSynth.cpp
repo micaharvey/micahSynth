@@ -140,6 +140,8 @@ int main() {
   StkFloat S = 0.5;
   StkFloat R = 0.5;
 
+  // TODO
+
   // MIDI variables
   std::vector<unsigned char> message;
   int nBytes;
