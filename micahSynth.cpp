@@ -140,7 +140,17 @@ int main() {
   StkFloat S = 0.5;
   StkFloat R = 0.5;
 
-  // TODO
+  // Knobule input name
+  std::string knobuleName ("Knobule");
+  int knobuleIdNum = -1;
+
+  // MIMIDI 25 detection
+  std::string soundStickName ("MIMIDI 25");
+  int soundStickIdNum = -1;
+
+  // AKAI MPK mini detection
+  std::string akaiMPKName ("MPKmini2");
+  int akaiMPKIdNum = -1;
 
   // MIDI variables
   std::vector<unsigned char> message;
@@ -148,9 +158,11 @@ int main() {
   double stamp;
 
   // RtMidiIn creation and constructor
-  RtMidiIn  *midiin = 0;
+  RtMidiIn  *mainMidiIn = 0;
+  RtMidiIn  *soundStickMidiIn = 0;
   try {
-    midiin = new RtMidiIn();
+    mainMidiIn = new RtMidiIn();
+    soundStickMidiIn = new RtMidiIn();
   }
   catch ( RtMidiError &error ) {
     error.printMessage();
@@ -158,12 +170,21 @@ int main() {
   }
 
   // Check and print MIDI inputs.
-  unsigned int nPorts = midiin->getPortCount();
+  unsigned int nPorts = mainMidiIn->getPortCount();
   std::cout << "\nThere are " << nPorts << " MIDI input sources available.\n";
   std::string portName;
+
+  // Find the midi ports we care about
   for ( unsigned int i=0; i<nPorts; i++ ) {
     try {
-      portName = midiin->getPortName(i);
+      portName = mainMidiIn->getPortName(i);
+      if( knobuleName.compare(portName) == 0 ) {
+        knobuleIdNum = i;
+      } else if ( soundStickName.compare(portName) == 0 ) {
+        soundStickIdNum = i;
+      } else if ( akaiMPKName.compare(portName) == 0 ) {
+        akaiMPKIdNum = i;
+      }
     }
     catch ( RtMidiError &error ) {
       error.printMessage();
@@ -172,11 +193,26 @@ int main() {
     std::cout << "  Input Port #" << i+1 << ": " << portName << '\n';
   }
 
-  // Open midi port at device id
-  midiin->openPort( MIDI_DEVICE_ID );
+  if(knobuleIdNum != -1 && soundStickIdNum != -1) {
+    // Open midi port at device ids
+    mainMidiIn->openPort( knobuleIdNum );
+    soundStickMidiIn->openPort( soundStickIdNum );
 
-  // Don't ignore sysex, timing, or active sensing messages.
-  midiin->ignoreTypes( false, false, false );
+    // Don't ignore sysex, timing, or active sensing messages.
+    mainMidiIn->ignoreTypes( false, false, false );
+    soundStickMidiIn->ignoreTypes( false, false, false );
+  } else if (akaiMPKIdNum != -1) {
+    // a bit hacky - Save a RtMidi object and logic by piggybacking on "main midi input"
+    // Open midi port at device ids
+    mainMidiIn->openPort( akaiMPKIdNum );
+
+    // Don't ignore sysex, timing, or active sensing messages.
+    mainMidiIn->ignoreTypes( false, false, false );
+  } else {
+    std::cout << "Please plug in soundstick + knobule or the akai mpk mini and try again\n";
+    goto cleanup;
+  }
+  
 
   // Open and start audio stream
   try {
@@ -193,8 +229,13 @@ int main() {
 
   // Event loop
   while(!g_done) {
-    stamp = midiin->getMessage( &message );
+    stamp = mainMidiIn->getMessage( &message );
     nBytes = message.size();
+
+    if (nBytes == 0) {
+      stamp = soundStickMidiIn->getMessage( &message );
+      nBytes = message.size();
+    }
 
     // if there are no messages, sleep for 5ms then check again
     if (nBytes == 0) {
@@ -218,6 +259,10 @@ int main() {
         knobNumber = (int)message[1];
         intensity  = (int)message[2];
         switch (knobNumber) {
+          case 0:  // filter resonance
+            resonance = (StkFloat)(intensity/ 128.0 );
+            g_micahSynth->setFilter(cutoff, resonance);
+            break;
           case 1:  // mod wheel, filter cutoff
             cutoff = (StkFloat)( 200.0 + intensity * 1000 / 128.0 );
             g_micahSynth->setFilter(cutoff, resonance);
@@ -285,6 +330,7 @@ int main() {
     error.printMessage();
   }
  cleanup:
-  delete midiin;
+  delete mainMidiIn;
+  delete soundStickMidiIn;
   return 0;
 }
