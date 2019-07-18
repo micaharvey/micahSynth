@@ -218,6 +218,7 @@ MiSynth::MiSynth( int numVoices) {
     m_muted = false;
     m_volume = 0.98;
     m_voiceSelect = 0;
+    m_filterMix = 0.95;
 
     // Filter set resonance
     m_biquad.setResonance( 440.0, 0.98, true );
@@ -234,8 +235,10 @@ MiSynth::~MiSynth() { }
 // desc: generate a sample of output
 //-----------------------------------------------------------------------------
 StkFloat MiSynth::tick() {
-    StkFloat returnSamp = 0;
+    StkFloat sumSamp = 0;
     StkFloat tickSamp = 0;
+    StkFloat filterSamp = 0;
+    StkFloat returnSamp = 0;
 
     // each voice has a few oscillators
     for (int i = 0; i < m_numVoices; i++) {
@@ -243,11 +246,13 @@ StkFloat MiSynth::tick() {
         tickSamp = m_voices.at(i)->tick();
 
         // sum the voices
-        returnSamp = returnSamp + tickSamp;
+        sumSamp = sumSamp + tickSamp;
     }
 
-    // filter and return the sum
-    return m_biquad.tick(returnSamp);
+    filterSamp = m_biquad.tick(sumSamp);
+    returnSamp = m_filterMix * filterSamp + (1.0 - m_filterMix) * sumSamp;
+
+    return returnSamp;
 }
 
 //-----------------------------------------------------------------------------
@@ -326,3 +331,12 @@ void MiSynth::setOscVolume(int oscNum, StkFloat volume) {
         m_voices.at(i)->setOscVolume(oscNum, volume);
     }
 }
+
+//-----------------------------------------------------------------------------
+// name: setFilterMix()
+// desc: set the level of the filter mix
+//-----------------------------------------------------------------------------
+void MiSynth::setFilterMix(StkFloat filterMix) {
+    m_filterMix = filterMix;
+}
+
