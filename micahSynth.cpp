@@ -1,5 +1,5 @@
 /* micahSynth.cpp
-
+ 
   Author: Micah Arvey
   Date: April 2019
   Description:
@@ -183,12 +183,15 @@ int main() {
   // Find the midi ports we care about
   for ( unsigned int i=0; i<nPorts; i++ ) {
     try {
+      // check the port name
       portName = mainMidiIn->getPortName(i);
-      if( knobuleName.compare(portName) == 0 ) {
+
+      // is it one we care about?
+      if( portName.find(knobuleName) != std::string::npos ) {
         knobuleIdNum = i;
-      } else if ( soundStickName.compare(portName) == 0 ) {
+      } else if ( portName.find(soundStickName) != std::string::npos ) {
         soundStickIdNum = i;
-      } else if ( akaiMPKName.compare(portName) == 0 ) {
+      } else if ( portName.find(akaiMPKName) != std::string::npos ) {
         akaiMPKIdNum = i;
       }
     }
@@ -199,6 +202,7 @@ int main() {
     std::cout << "  Input Port #" << i+1 << ": " << portName << '\n';
   }
 
+  // if we have both a knobule and a sound stick
   if(knobuleIdNum != -1 && soundStickIdNum != -1) {
     // Open midi port at device ids
     mainMidiIn->openPort( knobuleIdNum );
@@ -207,9 +211,11 @@ int main() {
     // Don't ignore sysex, timing, or active sensing messages.
     mainMidiIn->ignoreTypes( false, false, false );
     soundStickMidiIn->ignoreTypes( false, false, false );
+
+  // Elsewise use akai
   } else if (akaiMPKIdNum != -1) {
-    // a bit hacky - Save a RtMidi object and logic by piggybacking on "main midi input"
-    // Open midi port at device ids
+    //Save a RtMidi object and logic by piggybacking on "main midi input"
+    // Open midi port at akai port id
     mainMidiIn->openPort( akaiMPKIdNum );
 
     // Don't ignore sysex, timing, or active sensing messages.
@@ -217,12 +223,13 @@ int main() {
 
     // update layout mode
     g_layoutMode = AKAIMPK_LAYOUT;
+
+  // Otherwise there are no midi devices we care about plugged in
   } else {
     std::cout << "Please plug in soundstick + knobule or the akai mpk mini and try again\n";
     goto cleanup;
   }
   
-
   // Open and start audio stream
   try {
     dac.openStream( &parameters, NULL, format, (unsigned int)Stk::sampleRate(), &bufferFrames, &audioCallback );
@@ -238,9 +245,12 @@ int main() {
 
   // Event loop
   while(!g_done) {
+    // check main midi (knobule or akai)
     stamp = mainMidiIn->getMessage( &message );
     nBytes = message.size();
 
+    // TODO: dont check this if in akai mode
+    // if there was no message, check sound stick
     if (nBytes == 0) {
       stamp = soundStickMidiIn->getMessage( &message );
       nBytes = message.size();
@@ -252,7 +262,10 @@ int main() {
       continue;
     }
 
+    // Read the control Number
     int controlNumber = (int)message[0];
+
+    // Switch!  Based on cc Number
     switch (controlNumber) {
       case 144: // note on
         note = (int)message[1];
@@ -265,6 +278,7 @@ int main() {
         break;
 
       case  176: // knobs
+        // Switch based on layout mode (akai vs knobule+ss)
         switch(g_layoutMode) {
           case AKAIMPK_LAYOUT:
             knobNumber = (int)message[1];
