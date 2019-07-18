@@ -32,13 +32,16 @@ public:
 
 public:
     StkFloat tick();
-    void setWaveShape( int waveShape );
-    void setVolume( StkFloat volume );
-    void setFrequency( double freq );
+    void setWaveShape(int waveShape);
+    void setVolume(StkFloat volume);
+    void setFrequency(double freq);
+    void setTuning(StkFloat oscTuning);
 
 private:
     int m_waveShape;
     StkFloat m_oscVolume;
+    double m_tune;
+    double m_freq;
 
     BlitSaw m_blitSaw;
     BlitSquare m_blitSquare;
@@ -64,6 +67,7 @@ public:
     void setADSR(StkFloat A, StkFloat D, StkFloat S, StkFloat R);
     void setWaveShape(int oscNum, int waveShape);
     void setOscVolume(int oscNum, StkFloat volume);
+    void setOscTuning(int oscNum, double oscTuning);
     int getNote();
 
 private:
@@ -100,6 +104,7 @@ public:
     void setFilter(StkFloat cutFreq, StkFloat resonance);
     void setWaveShape(int oscNum, int waveShape);
     void setOscVolume(int oscNum, StkFloat oscVolume);
+    void setOscTuning(int oscNum, double oscTuning);
     void setFilterMix(StkFloat filterMix);
 
 private:

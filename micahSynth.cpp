@@ -135,6 +135,7 @@ int main() {
   int intensity = 0;
   int knobNumber = 0;
   int waveShape = 0;
+  double tune = 1.0;
   StkFloat cutoff = 440.0;
   StkFloat resonance = 0.98;
   StkFloat maxResonance = 0.98;
@@ -319,6 +320,16 @@ int main() {
               case 29:  // mod wheel, filter cutoff
                 cutoff = (StkFloat)( 20.0 + intensity * 10000.0 / 128.0 );
                 g_micahSynth->setFilter(cutoff, resonance);
+                break;
+              case 0:
+                break;
+              case 3:
+                tune = 0.5 + 1.5 * (intensity / 127.0);
+                g_micahSynth->setOscTuning(1, tune);
+                break;
+              case 6:
+                tune = 0.5 + 1.5 * (intensity / 127.0);
+                g_micahSynth->setOscTuning(2, tune);
                 break;
               case 1:
                 waveShape = intensity / 32;

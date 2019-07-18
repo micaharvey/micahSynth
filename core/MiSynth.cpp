@@ -10,10 +10,12 @@ using namespace stk;
 MiOsc::MiOsc() {
     m_waveShape = SAW;
     m_oscVolume = 0.5;
+    m_tune = 1.0;
+    m_freq = 200.0;
 
-    m_sine.setFrequency(200.0);
-    m_blitSaw.setFrequency(200.0);
-    m_blitSquare.setFrequency(200.0);
+    m_sine.setFrequency(m_freq);
+    m_blitSaw.setFrequency(m_freq);
+    m_blitSquare.setFrequency(m_freq);
 }
 
 //-----------------------------------------------------------------------------
@@ -44,9 +46,21 @@ void MiOsc::setVolume(StkFloat volume) {
 // desc: Set frequency for the oscilator
 //-----------------------------------------------------------------------------
 void MiOsc::setFrequency(double freq) {
+    m_freq = freq;
+    freq *= m_tune;
+
     m_sine.setFrequency(freq);
     m_blitSaw.setFrequency(freq);
     m_blitSquare.setFrequency(freq);
+}
+
+//-----------------------------------------------------------------------------
+// name: setTuning()
+// desc: Set tuning of the oscilator
+//-----------------------------------------------------------------------------
+void MiOsc::setTuning(double tune) {
+    m_tune = tune;
+    setFrequency(m_freq);
 }
 
 //-----------------------------------------------------------------------------
@@ -200,6 +214,17 @@ void MiVoice::setWaveShape(int oscNum, int waveShape) {
 void MiVoice::setOscVolume(int oscNum, StkFloat volume) {
     m_oscillators.at(oscNum)->setVolume(volume);
 }
+//-----------------------------------------------------------------------------
+// name: setOscTuning()
+// desc: set the tuning of the oscillator
+//-----------------------------------------------------------------------------
+void MiVoice::setOscTuning(int oscNum, double oscTuning) {
+    m_oscillators.at(oscNum)->setTuning(oscTuning);
+}
+
+  //---------//
+ // MiSynth //
+//---------//
 
 //-----------------------------------------------------------------------------
 // name: MiSynth()
@@ -340,3 +365,12 @@ void MiSynth::setFilterMix(StkFloat filterMix) {
     m_filterMix = filterMix;
 }
 
+//-----------------------------------------------------------------------------
+// name: setOscTuning()
+// desc: set the tuning of the oscillator
+//-----------------------------------------------------------------------------
+void MiSynth::setOscTuning(int oscNum, double oscTuning) {
+    for (int i = 0; i < m_numVoices; i++) {
+        m_voices.at(i)->setOscTuning(oscNum, oscTuning);
+    }
+}
