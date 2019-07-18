@@ -9,6 +9,7 @@ using namespace stk;
 //-----------------------------------------------------------------------------
 MiOsc::MiOsc() {
     m_waveShape = SAW;
+    m_oscVolume = 0.5;
 
     m_sine.setFrequency(200.0);
     m_blitSaw.setFrequency(200.0);
@@ -30,6 +31,15 @@ void MiOsc::setWaveShape(int waveShape) {
 }
 
 //-----------------------------------------------------------------------------
+// name: SetVolume()
+// desc: set the volume of the oscilator
+//-----------------------------------------------------------------------------
+void MiOsc::setVolume(StkFloat volume) {
+    m_oscVolume = volume;
+}
+
+
+//-----------------------------------------------------------------------------
 // name: setFrequency()
 // desc: Set frequency for the oscilator
 //-----------------------------------------------------------------------------
@@ -44,16 +54,24 @@ void MiOsc::setFrequency(double freq) {
 // desc: generate a sample of output
 //-----------------------------------------------------------------------------
 StkFloat MiOsc::tick() {
+    StkFloat sample;
+
     switch (m_waveShape) {
       case SINE:
-        return m_sine.tick();
+        sample = m_sine.tick();
+        break;
       case SAW:
-        return m_blitSaw.tick();
+        sample = m_blitSaw.tick();
+        break;
       case SQUARE:
-        return m_blitSquare.tick();
+        sample = m_blitSquare.tick();
+        break;
       default:
         return 0;
     }
+
+    sample *= m_oscVolume;
+    return sample;
 }
 
 //-----------------------------------------------------------------------------
@@ -147,9 +165,6 @@ StkFloat MiVoice::tick() {
         // tick the oscillators
         tickSamp = m_oscillators.at(i)->tick();
 
-        // scale down
-        tickSamp = (StkFloat) tickSamp * (StkFloat)(1.0 / (double)m_numOscillators);
-
         // sum the oscillators
         returnSamp = returnSamp + tickSamp;
     }
@@ -174,8 +189,16 @@ void MiVoice::setADSR(StkFloat A, StkFloat D, StkFloat S, StkFloat R) {
 // name: SetWaveShape()
 // desc: set the wave shape for the oscilator
 //-----------------------------------------------------------------------------
-void MiVoice::setWaveShape(int osc, int waveShape) {
-    m_oscillators.at(osc)->setWaveShape(waveShape);
+void MiVoice::setWaveShape(int oscNum, int waveShape) {
+    m_oscillators.at(oscNum)->setWaveShape(waveShape);
+}
+
+//-----------------------------------------------------------------------------
+// name: SetOscVolume()
+// desc: set the volume of the oscilator
+//-----------------------------------------------------------------------------
+void MiVoice::setOscVolume(int oscNum, StkFloat volume) {
+    m_oscillators.at(oscNum)->setVolume(volume);
 }
 
 //-----------------------------------------------------------------------------
@@ -218,9 +241,6 @@ StkFloat MiSynth::tick() {
     for (int i = 0; i < m_numVoices; i++) {
         // tick the oscillators
         tickSamp = m_voices.at(i)->tick();
-
-        // scale down
-        tickSamp = (StkFloat) tickSamp * (StkFloat)((double)1 / (double)m_numVoices);
 
         // sum the voices
         returnSamp = returnSamp + tickSamp;
@@ -288,11 +308,21 @@ void MiSynth::setFilter(StkFloat cutFreq, StkFloat resonance) {
 }
 
 //-----------------------------------------------------------------------------
-// name: SetWaveShape()
+// name: setWaveShape()
 // desc: set the wave shape for the oscilator
 //-----------------------------------------------------------------------------
-void MiSynth::setWaveShape(int osc, int waveShape) {
+void MiSynth::setWaveShape(int oscNum, int waveShape) {
     for (int i = 0; i < m_numVoices; i++) {
-        m_voices.at(i)->setWaveShape(osc, waveShape);
+        m_voices.at(i)->setWaveShape(oscNum, waveShape);
+    }
+}
+
+//-----------------------------------------------------------------------------
+// name: setOscVolume()
+// desc: set the volume of the oscilator
+//-----------------------------------------------------------------------------
+void MiSynth::setOscVolume(int oscNum, StkFloat volume) {
+    for (int i = 0; i < m_numVoices; i++) {
+        m_voices.at(i)->setOscVolume(oscNum, volume);
     }
 }
