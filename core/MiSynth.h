@@ -33,10 +33,12 @@ public:
 public:
     StkFloat tick();
     void setWaveShape( int waveShape );
+    void setVolume( StkFloat volume );
     void setFrequency( double freq );
 
 private:
     int m_waveShape;
+    StkFloat m_oscVolume;
 
     BlitSaw m_blitSaw;
     BlitSquare m_blitSquare;
@@ -60,7 +62,8 @@ public:
     void playNote(int note, int velocity = 127);
     void stopNote();
     void setADSR(StkFloat A, StkFloat D, StkFloat S, StkFloat R);
-    void setWaveShape(int oscID, int waveShape);
+    void setWaveShape(int oscNum, int waveShape);
+    void setOscVolume(int oscNum, StkFloat volume);
     int getNote();
 
 private:
@@ -95,7 +98,8 @@ public:
     void noteOff(int note);
     void setADSR(StkFloat A, StkFloat D, StkFloat S, StkFloat R);
     void setFilter(StkFloat cutFreq, StkFloat resonance);
-    void setWaveShape(int oscID, int waveShape);
+    void setWaveShape(int oscNum, int waveShape);
+    void setOscVolume(int oscNum, StkFloat oscVolume);
 
 private:
     int m_numVoices;

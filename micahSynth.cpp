@@ -299,6 +299,17 @@ int main() {
             R *= R;
             g_micahSynth->setADSR(A, D, S, R);
             break;
+          case 9:
+            g_micahSynth->setOscVolume(0, ((StkFloat)(intensity+1) / 130.0));
+            break;
+          case 10:
+            g_micahSynth->setOscVolume(1, ((StkFloat)(intensity+1) / 130.0));
+            break;
+          case 11:
+            g_micahSynth->setOscVolume(2, ((StkFloat)(intensity+1) / 130.0));
+            break;
+          case 27:
+            g_volume = (StkFloat)(intensity+1) / 130.0;
           default:
             break;
         }
