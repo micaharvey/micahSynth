@@ -100,6 +100,7 @@ public:
     void setFilter(StkFloat cutFreq, StkFloat resonance);
     void setWaveShape(int oscNum, int waveShape);
     void setOscVolume(int oscNum, StkFloat oscVolume);
+    void setFilterMix(StkFloat filterMix);
 
 private:
     int m_numVoices;
@@ -108,6 +109,7 @@ private:
     double m_volume;
     int m_voiceSelect;
     BiQuad m_biquad;
+    StkFloat m_filterMix;
 };
 
 #endif
