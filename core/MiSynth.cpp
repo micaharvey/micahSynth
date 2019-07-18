@@ -219,9 +219,6 @@ StkFloat MiSynth::tick() {
         // tick the oscillators
         tickSamp = m_voices.at(i)->tick();
 
-        // scale down
-        tickSamp = (StkFloat) tickSamp * (StkFloat)((double)1 / (double)m_numVoices);
-
         // sum the voices
         returnSamp = returnSamp + tickSamp;
     }
