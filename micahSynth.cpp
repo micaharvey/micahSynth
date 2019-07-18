@@ -43,6 +43,8 @@ using namespace stk;
 #define NOTE_ON 144
 #define NOTE_OFF 128
 #define CONTROL_CHANGE 176
+#define KNOBULE_LAYOUT 0
+#define AKAIMPK_LAYOUT 1
 
 // global variables (good place for changing settings)
 int g_numVoices = NUM_DEFALUT_VOICES;
@@ -52,6 +54,9 @@ StkFloat g_volume = DEFAULT_VOLUME;
 int g_modAmount = 0;
 int g_pitchValue = 64;
 int g_pitchValueOffset = 64;
+
+// knob layout mode
+int g_layoutMode = KNOBULE_LAYOUT;
 
 // MiSynth
 MiSynth* g_micahSynth;
@@ -208,6 +213,9 @@ int main() {
 
     // Don't ignore sysex, timing, or active sensing messages.
     mainMidiIn->ignoreTypes( false, false, false );
+
+    // update layout mode
+    g_layoutMode = AKAIMPK_LAYOUT;
   } else {
     std::cout << "Please plug in soundstick + knobule or the akai mpk mini and try again\n";
     goto cleanup;
@@ -256,65 +264,112 @@ int main() {
         break;
 
       case  176: // knobs
-        knobNumber = (int)message[1];
-        intensity  = (int)message[2];
-        switch (knobNumber) {
-          case 0:  // filter resonance
-            resonance = (StkFloat)((intensity+1)/ 130.0 );
-            g_micahSynth->setFilter(cutoff, resonance);
+        switch(g_layoutMode) {
+          case AKAIMPK_LAYOUT:
+            knobNumber = (int)message[1];
+            intensity  = (int)message[2];
+            switch (knobNumber) {
+              case 1:  // mod wheel, filter cutoff
+                cutoff = (StkFloat)( 20.0 + intensity * 10000.0 / 128.0 );
+                g_micahSynth->setFilter(cutoff, resonance);
+                break;
+              case 2:
+                waveShape = intensity / 32;
+                g_micahSynth->setWaveShape(0, waveShape);
+                break;
+              case 3:
+                waveShape = intensity / 32;
+                g_micahSynth->setWaveShape(1, waveShape);
+                break;
+              case 4:
+                waveShape = intensity / 32;
+                g_micahSynth->setWaveShape(2, waveShape);
+                break;
+              case 5:
+                A = (StkFloat)(intensity+1) / 130.0;
+                A *= A;
+                g_micahSynth->setADSR(A, D, S, R);
+                break;
+              case 6:
+                D = (StkFloat)(intensity+1) / 130.0;
+                D *= D;
+                g_micahSynth->setADSR(A, D, S, R);
+                break;
+              case 7:
+                S = (StkFloat)(intensity+1) / 130.0;
+                S *= S;
+                g_micahSynth->setADSR(A, D, S, R);
+                break;
+              case 8:
+                R = (StkFloat)(intensity+1) / 130.0;
+                R *= R;
+                g_micahSynth->setADSR(A, D, S, R);
+                break;
+              }
             break;
-          case 1:  // mod wheel, filter cutoff
-            cutoff = (StkFloat)( 20.0 + intensity * 10000.0 / 128.0 );
-            g_micahSynth->setFilter(cutoff, resonance);
-            break;
-          case 2:
-            waveShape = intensity / 32;
-            g_micahSynth->setWaveShape(0, waveShape);
-            break;
-          case 3:
-            waveShape = intensity / 32;
-            g_micahSynth->setWaveShape(1, waveShape);
-            break;
-          case 4:
-            waveShape = intensity / 32;
-            g_micahSynth->setWaveShape(2, waveShape);
-            break;
-          case 5:
-            A = (StkFloat)(intensity+1) / 130.0;
-            A *= A;
-            g_micahSynth->setADSR(A, D, S, R);
-            break;
-          case 6:
-            D = (StkFloat)(intensity+1) / 130.0;
-            D *= D;
-            g_micahSynth->setADSR(A, D, S, R);
-            break;
-          case 7:
-            S = (StkFloat)(intensity+1) / 130.0;
-            S *= S;
-            g_micahSynth->setADSR(A, D, S, R);
-            break;
-          case 8:
-            R = (StkFloat)(intensity+1) / 130.0;
-            R *= R;
-            g_micahSynth->setADSR(A, D, S, R);
-            break;
-          case 9:
-            g_micahSynth->setOscVolume(0, ((StkFloat)(intensity+1) / 130.0));
-            break;
-          case 10:
-            g_micahSynth->setOscVolume(1, ((StkFloat)(intensity+1) / 130.0));
-            break;
-          case 11:
-            g_micahSynth->setOscVolume(2, ((StkFloat)(intensity+1) / 130.0));
-            break;
-          case 12:
-            g_micahSynth->setFilterMix((StkFloat)(intensity+1) / 130.0);
-            break;
-          case 27:
-            g_volume = (StkFloat)(intensity+1) / 130.0;
+          case KNOBULE_LAYOUT:
           default:
-            break;
+            knobNumber = (int)message[1];
+            intensity  = (int)message[2];
+            switch (knobNumber) {
+              case 24:  // filter resonance
+                resonance = (StkFloat)((intensity+1)/ 130.0 );
+                g_micahSynth->setFilter(cutoff, resonance);
+                break;
+              case 29:  // mod wheel, filter cutoff
+                cutoff = (StkFloat)( 20.0 + intensity * 10000.0 / 128.0 );
+                g_micahSynth->setFilter(cutoff, resonance);
+                break;
+              case 1:
+                waveShape = intensity / 32;
+                g_micahSynth->setWaveShape(0, waveShape);
+                break;
+              case 4:
+                waveShape = intensity / 32;
+                g_micahSynth->setWaveShape(1, waveShape);
+                break;
+              case 7:
+                waveShape = intensity / 32;
+                g_micahSynth->setWaveShape(2, waveShape);
+                break;
+              case 21:
+                A = (StkFloat)(intensity+1) / 130.0;
+                A *= A;
+                g_micahSynth->setADSR(A, D, S, R);
+                break;
+              case 22:
+                D = (StkFloat)(intensity+1) / 130.0;
+                D *= D;
+                g_micahSynth->setADSR(A, D, S, R);
+                break;
+              case 26:
+                S = (StkFloat)(intensity+1) / 130.0;
+                S *= S;
+                g_micahSynth->setADSR(A, D, S, R);
+                break;
+              case 23:
+                R = (StkFloat)(intensity+1) / 130.0;
+                R *= R;
+                g_micahSynth->setADSR(A, D, S, R);
+                break;
+              case 2:
+                g_micahSynth->setOscVolume(0, ((StkFloat)(intensity+1) / 130.0));
+                break;
+              case 5:
+                g_micahSynth->setOscVolume(1, ((StkFloat)(intensity+1) / 130.0));
+                break;
+              case 8:
+                g_micahSynth->setOscVolume(2, ((StkFloat)(intensity+1) / 130.0));
+                break;
+              case 28:
+                g_micahSynth->setFilterMix((StkFloat)(intensity+1) / 130.0);
+                break;
+              case 27:
+                g_volume = (StkFloat)(intensity+1) / 130.0;
+              default:
+                break;
+              }
+          break;
         }
         break;
 
