@@ -241,10 +241,11 @@ MiSynth::MiSynth( int numVoices) {
 
     m_numVoices = numVoices;
     m_muted = false;
-    m_volume = 0.98;
+    m_volume = 0.9;
     m_voiceSelect = 0;
-    m_filterMix = 0.9;
+    m_filterMix = 0.1;
     m_reverbMix = 0.9;
+    m_reverbType = NREV;
 
     // Filter set resonance
     m_biquad.setResonance( 440.0, 0.98, true );
@@ -256,6 +257,21 @@ MiSynth::MiSynth( int numVoices) {
     m_freeRev.setEffectMix(1);
     m_freeRev.setRoomSize(0.95);
     m_freeRev.setDamping (0.5);
+
+    // Echo setup
+    unsigned long del = 11000;
+    m_echoFeedback = 0.8;
+    m_echoMix = 0.5;
+    // 10 second maximum delay (in samples)
+    m_echo1.setMaximumDelay(44100 * 10);
+    m_echo2.setMaximumDelay(44100 * 10);
+    m_echo3.setMaximumDelay(44100 * 10);
+    m_echo4.setMaximumDelay(44100 * 10);
+    // set the delays
+    m_echo1.setDelay(del);
+    m_echo2.setDelay(del * 2);
+    m_echo3.setDelay(del * 3);
+    m_echo4.setDelay(del * 4);
 }
 
 //-----------------------------------------------------------------------------
@@ -272,7 +288,11 @@ StkFloat MiSynth::tick() {
     StkFloat sumSamp = 0;
     StkFloat tickSamp = 0;
     StkFloat filterSamp = 0;
+    StkFloat filterMixedSamp = 0;
     StkFloat revSamp = 0;
+    StkFloat revMixedSamp = 0;
+    StkFloat echoSamp = 0;
+    StkFloat echoMixedSamp = 0;
     StkFloat returnSamp = 0;
 
     // each voice has a few oscillators
@@ -286,25 +306,33 @@ StkFloat MiSynth::tick() {
 
     // Apply Filter
     filterSamp = m_biquad.tick(sumSamp);
-    returnSamp = m_filterMix * filterSamp + (1.0 - m_filterMix) * sumSamp;
+    filterMixedSamp = m_filterMix * filterSamp + (1.0 - m_filterMix) * sumSamp;
+
+    echoSamp += m_echo1.tick(filterMixedSamp) * m_echoFeedback;
+    echoSamp += m_echo2.tick(filterMixedSamp) * m_echoFeedback * m_echoFeedback;
+    echoSamp += m_echo3.tick(filterMixedSamp) * m_echoFeedback * m_echoFeedback * m_echoFeedback;
+    echoSamp += m_echo4.tick(filterMixedSamp) * m_echoFeedback * m_echoFeedback * m_echoFeedback * m_echoFeedback;
+
+    echoMixedSamp = m_echoMix * echoSamp + (1.0 - m_echoMix) * filterMixedSamp;
 
     // Apply Reverb
     switch (m_reverbType) {
         case PRCREV:
-            revSamp = m_prcRev.tick(returnSamp);
+            revSamp = m_prcRev.tick(echoMixedSamp);
             break;
         case FREEREV:
-            revSamp = m_freeRev.tick(returnSamp);
+            revSamp = m_freeRev.tick(echoMixedSamp);
             break;
         case NREV:
-            revSamp = m_nRev.tick(returnSamp);
+            revSamp = m_nRev.tick(echoMixedSamp);
             break;
         case JCREV:
         default:
-            revSamp = m_jcRev.tick(returnSamp);
+            revSamp = m_jcRev.tick(echoMixedSamp);
             break;
     }
-    returnSamp = m_reverbMix * revSamp + (1.0 - m_reverbMix) * returnSamp;
+    revMixedSamp = m_reverbMix * revSamp + (1.0 - m_reverbMix) * echoMixedSamp;
+    returnSamp = revMixedSamp;
 
     return returnSamp;
 }
@@ -432,6 +460,35 @@ void MiSynth::setReverbSize(StkFloat reverbSize) {
     m_freeRev.setDamping (0.5);
 }
 
+//-----------------------------------------------------------------------------
+// name: setEchoLength()
+// desc: set the length of the echo
+//-----------------------------------------------------------------------------
+void MiSynth::setEchoLength(unsigned long echoLength) {
+    m_echoLength = echoLength;
+
+    // set the delays
+    m_echo1.setDelay(echoLength);
+    m_echo2.setDelay(echoLength * 2);
+    m_echo3.setDelay(echoLength * 3);
+    m_echo4.setDelay(echoLength * 4);
+}
+
+//-----------------------------------------------------------------------------
+// name: setEchoFeedback()
+// desc: set the length of the echo
+//-----------------------------------------------------------------------------
+void MiSynth::setEchoFeedback(StkFloat echoFeedback) {
+    m_echoFeedback = echoFeedback;
+}
+
+//-----------------------------------------------------------------------------
+// name: setEchoMix()
+// desc: set the mix of the echo
+//-----------------------------------------------------------------------------
+void MiSynth::setEchoMix(StkFloat echoMix) {
+    m_echoMix = echoMix;
+}
 
 //-----------------------------------------------------------------------------
 // name: setOscTuning()

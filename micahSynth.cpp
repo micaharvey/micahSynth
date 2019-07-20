@@ -137,6 +137,7 @@ int main() {
   int waveShape = 0;
   int reverbType = 0;
   StkFloat reverbSize = 0;
+  unsigned long echoLength = 0;
   double tune = 1.0;
   StkFloat cutoff = 440.0;
   StkFloat resonance = 0.98;
@@ -398,6 +399,16 @@ int main() {
               case 9:
                 reverbSize = intensity / 16 + 0.1;
                 g_micahSynth->setReverbSize(reverbSize);
+                break;
+              case 12:
+                g_micahSynth->setEchoFeedback((StkFloat)(intensity+1) / 130.0);
+                break;
+              case 13:
+                echoLength = 44100 * intensity / 128.0;
+                g_micahSynth->setEchoLength(echoLength);
+                break;
+              case 14:
+                g_micahSynth->setEchoMix((StkFloat)(intensity+1) / 130.0);
                 break;
               case 28:
                 g_micahSynth->setFilterMix((StkFloat)(intensity+1) / 130.0);
