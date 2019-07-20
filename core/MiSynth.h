@@ -14,6 +14,7 @@
 #include "JCRev.h"
 #include "FreeVerb.h"
 #include "NRev.h"
+#include "Echo.h"
 #include "x-fun.h"
 
 using namespace stk;
@@ -120,6 +121,9 @@ public:
     void setReverbMix(StkFloat reverbMix);
     void setReverbType(int reverbType);
     void setReverbSize(StkFloat reverbSize);
+    void setEchoLength(unsigned long echoLength);
+    void setEchoMix(StkFloat echoMix);
+    void setEchoFeedback(StkFloat echoFeedback);
 
 private:
     int m_numVoices;
@@ -136,6 +140,13 @@ private:
     FreeVerb m_freeRev;
     int m_reverbType;
     StkFloat m_reverbSize;
+    Echo m_echo1;
+    Echo m_echo2;
+    Echo m_echo3;
+    Echo m_echo4;
+    unsigned long m_echoLength;
+    StkFloat m_echoMix;
+    StkFloat m_echoFeedback;
 };
 
 #endif
