@@ -9,6 +9,11 @@
 #include "BlitSaw.h"
 #include "BlitSquare.h"
 #include "Blit.h"
+#include "Effect.h"
+#include "PRCRev.h"
+#include "JCRev.h"
+#include "FreeVerb.h"
+#include "NRev.h"
 #include "x-fun.h"
 
 using namespace stk;
@@ -18,6 +23,12 @@ using namespace stk;
 #define SAW     1
 #define SQUARE  2
 #define PULSE   3
+
+// REVERB TYPES
+#define PRCREV    0
+#define JCREV     1
+#define NREV      2
+#define FREEREV   3
 
 //-----------------------------------------------------------------------------
 // name: class MiOsc
@@ -106,6 +117,9 @@ public:
     void setOscVolume(int oscNum, StkFloat oscVolume);
     void setOscTuning(int oscNum, double oscTuning);
     void setFilterMix(StkFloat filterMix);
+    void setReverbMix(StkFloat reverbMix);
+    void setReverbType(int reverbType);
+    void setReverbSize(StkFloat reverbSize);
 
 private:
     int m_numVoices;
@@ -115,6 +129,13 @@ private:
     int m_voiceSelect;
     BiQuad m_biquad;
     StkFloat m_filterMix;
+    StkFloat m_reverbMix;
+    PRCRev m_prcRev;
+    NRev m_nRev;
+    JCRev m_jcRev;
+    FreeVerb m_freeRev;
+    int m_reverbType;
+    StkFloat m_reverbSize;
 };
 
 #endif

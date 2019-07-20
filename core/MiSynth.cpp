@@ -243,10 +243,19 @@ MiSynth::MiSynth( int numVoices) {
     m_muted = false;
     m_volume = 0.98;
     m_voiceSelect = 0;
-    m_filterMix = 0.95;
+    m_filterMix = 0.9;
+    m_reverbMix = 0.9;
 
     // Filter set resonance
     m_biquad.setResonance( 440.0, 0.98, true );
+
+    // Reverb setup
+    m_prcRev.setT60(5);
+    m_jcRev.setT60(5);
+    m_nRev.setT60(5);
+    m_freeRev.setEffectMix(1);
+    m_freeRev.setRoomSize(0.95);
+    m_freeRev.setDamping (0.5);
 }
 
 //-----------------------------------------------------------------------------
@@ -263,6 +272,7 @@ StkFloat MiSynth::tick() {
     StkFloat sumSamp = 0;
     StkFloat tickSamp = 0;
     StkFloat filterSamp = 0;
+    StkFloat revSamp = 0;
     StkFloat returnSamp = 0;
 
     // each voice has a few oscillators
@@ -274,8 +284,27 @@ StkFloat MiSynth::tick() {
         sumSamp = sumSamp + tickSamp;
     }
 
+    // Apply Filter
     filterSamp = m_biquad.tick(sumSamp);
     returnSamp = m_filterMix * filterSamp + (1.0 - m_filterMix) * sumSamp;
+
+    // Apply Reverb
+    switch (m_reverbType) {
+        case PRCREV:
+            revSamp = m_prcRev.tick(returnSamp);
+            break;
+        case FREEREV:
+            revSamp = m_freeRev.tick(returnSamp);
+            break;
+        case NREV:
+            revSamp = m_nRev.tick(returnSamp);
+            break;
+        case JCREV:
+        default:
+            revSamp = m_jcRev.tick(returnSamp);
+            break;
+    }
+    returnSamp = m_reverbMix * revSamp + (1.0 - m_reverbMix) * returnSamp;
 
     return returnSamp;
 }
@@ -364,6 +393,45 @@ void MiSynth::setOscVolume(int oscNum, StkFloat volume) {
 void MiSynth::setFilterMix(StkFloat filterMix) {
     m_filterMix = filterMix;
 }
+
+//-----------------------------------------------------------------------------
+// name: setReverbMix()
+// desc: set the level of the reverb mix
+//-----------------------------------------------------------------------------
+void MiSynth::setReverbMix(StkFloat reverbMix) {
+    m_reverbMix = reverbMix;
+}
+
+//-----------------------------------------------------------------------------
+// name: setReverbType()
+// desc: set the reverb type
+//-----------------------------------------------------------------------------
+void MiSynth::setReverbType(int reverbType) {
+    m_reverbType = reverbType;
+
+    // Also interesting to not clear them
+    m_prcRev.clear();
+    m_jcRev.clear();
+    m_nRev.clear();
+    m_freeRev.clear();
+}
+
+//-----------------------------------------------------------------------------
+// name: setReverbSize()
+// desc: set the reverb size
+//-----------------------------------------------------------------------------
+void MiSynth::setReverbSize(StkFloat reverbSize) {
+    m_reverbSize = reverbSize;
+
+    // Reverb settings
+    m_prcRev.setT60(reverbSize);
+    m_jcRev.setT60(reverbSize);
+    m_nRev.setT60(reverbSize);
+    m_freeRev.setEffectMix(1);
+    m_freeRev.setRoomSize(reverbSize / 7.11);
+    m_freeRev.setDamping (0.5);
+}
+
 
 //-----------------------------------------------------------------------------
 // name: setOscTuning()

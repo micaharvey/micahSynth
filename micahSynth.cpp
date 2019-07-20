@@ -135,6 +135,8 @@ int main() {
   int intensity = 0;
   int knobNumber = 0;
   int waveShape = 0;
+  int reverbType = 0;
+  StkFloat reverbSize = 0;
   double tune = 1.0;
   StkFloat cutoff = 440.0;
   StkFloat resonance = 0.98;
@@ -385,6 +387,17 @@ int main() {
                 break;
               case 8:
                 g_micahSynth->setOscVolume(2, ((StkFloat)(intensity+1) / 130.0));
+                break;
+              case 11:
+                g_micahSynth->setReverbMix((StkFloat)(intensity+1) / 130.0);
+                break;
+              case 10:
+                reverbType = intensity / 32;
+                g_micahSynth->setReverbType(reverbType);
+                break;
+              case 9:
+                reverbSize = intensity / 16 + 0.1;
+                g_micahSynth->setReverbSize(reverbSize);
                 break;
               case 28:
                 g_micahSynth->setFilterMix((StkFloat)(intensity+1) / 130.0);
