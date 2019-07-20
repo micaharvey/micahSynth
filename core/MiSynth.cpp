@@ -308,6 +308,7 @@ StkFloat MiSynth::tick() {
     filterSamp = m_biquad.tick(sumSamp);
     filterMixedSamp = m_filterMix * filterSamp + (1.0 - m_filterMix) * sumSamp;
 
+    echoSamp += filterMixedSamp;
     echoSamp += m_echo1.tick(filterMixedSamp) * m_echoFeedback;
     echoSamp += m_echo2.tick(filterMixedSamp) * m_echoFeedback * m_echoFeedback;
     echoSamp += m_echo3.tick(filterMixedSamp) * m_echoFeedback * m_echoFeedback * m_echoFeedback;
