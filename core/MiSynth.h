@@ -124,10 +124,16 @@ public:
     void setEchoLength(unsigned long echoLength);
     void setEchoMix(StkFloat echoMix);
     void setEchoFeedback(StkFloat echoFeedback);
+    void setLFOFrequency(int lfoNum, double freq);
+    void setLFOWaveShape(int lfoNum, int waveShape);
+    void setLFODepth(int lfoNum, StkFloat depth);
+    void setTremeloMix(StkFloat tremeloMix);
 
 private:
     int m_numVoices;
+    int m_numLFOs;
     std::vector<MiVoice*> m_voices;
+    std::vector<MiOsc*> m_LFOs;
     bool m_muted;
     double m_volume;
     int m_voiceSelect;
@@ -147,6 +153,7 @@ private:
     unsigned long m_echoLength;
     StkFloat m_echoMix;
     StkFloat m_echoFeedback;
+    StkFloat m_tremeloMix;
 };
 
 #endif

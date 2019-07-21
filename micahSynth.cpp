@@ -45,6 +45,7 @@ using namespace stk;
 #define CONTROL_CHANGE 176
 #define KNOBULE_LAYOUT 0
 #define AKAIMPK_LAYOUT 1
+#define LFO_SPEED_MAX (13.0)
 
 // global variables (good place for changing settings)
 int g_numVoices = NUM_DEFALUT_VOICES;
@@ -409,6 +410,15 @@ int main() {
                 break;
               case 14:
                 g_micahSynth->setEchoMix((StkFloat)(intensity+1) / 130.0);
+                break;
+              case 15:
+                g_micahSynth->setLFOFrequency(0, 0.25 + LFO_SPEED_MAX * (StkFloat)(intensity+1) / 130.0);
+                break;
+              case 16:
+                g_micahSynth->setLFODepth(0, (StkFloat)(intensity+1) / 130.0);
+                break;
+              case 17:
+                g_micahSynth->setTremeloMix((StkFloat)(intensity+1) / 130.0);
                 break;
               case 28:
                 g_micahSynth->setFilterMix((StkFloat)(intensity+1) / 130.0);

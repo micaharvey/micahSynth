@@ -233,13 +233,14 @@ void MiVoice::setOscTuning(int oscNum, double oscTuning) {
 MiSynth::MiSynth( int numVoices) { 
     std::cout << "MiSynth inbound with " << numVoices << " voices\n";
 
-    // add oscillators
+    // add voices
     for( int i = 0; i < numVoices; i++) {
         MiVoice* voice = new MiVoice();
         m_voices.push_back(voice);
     }
 
     m_numVoices = numVoices;
+    m_numLFOs = 2;
     m_muted = false;
     m_volume = 0.9;
     m_voiceSelect = 0;
@@ -272,6 +273,15 @@ MiSynth::MiSynth( int numVoices) {
     m_echo2.setDelay(del * 2);
     m_echo3.setDelay(del * 3);
     m_echo4.setDelay(del * 4);
+
+    // LFO setup
+    for( int i = 0; i < m_numLFOs; i++) {
+        MiOsc* lfo = new MiOsc();
+        lfo->setFrequency(1.0);
+        lfo->setWaveShape(SINE);
+        lfo->setVolume(1.0);
+        m_LFOs.push_back(lfo);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -293,6 +303,7 @@ StkFloat MiSynth::tick() {
     StkFloat revMixedSamp = 0;
     StkFloat echoSamp = 0;
     StkFloat echoMixedSamp = 0;
+    StkFloat tremeloSamp = 0;
     StkFloat returnSamp = 0;
 
     // each voice has a few oscillators
@@ -308,6 +319,7 @@ StkFloat MiSynth::tick() {
     filterSamp = m_biquad.tick(sumSamp);
     filterMixedSamp = m_filterMix * filterSamp + (1.0 - m_filterMix) * sumSamp;
 
+    // Apply echo
     echoSamp += filterMixedSamp;
     echoSamp += m_echo1.tick(filterMixedSamp) * m_echoFeedback;
     echoSamp += m_echo2.tick(filterMixedSamp) * m_echoFeedback * m_echoFeedback;
@@ -332,9 +344,17 @@ StkFloat MiSynth::tick() {
             revSamp = m_jcRev.tick(echoMixedSamp);
             break;
     }
-    revMixedSamp = m_reverbMix * revSamp + (1.0 - m_reverbMix) * echoMixedSamp;
-    returnSamp = revMixedSamp;
 
+    // mix the reverb
+    revMixedSamp = m_reverbMix * revSamp + (1.0 - m_reverbMix) * echoMixedSamp;
+
+    // Tremelo!
+    tremeloSamp = revMixedSamp * (0.5 + 0.5 * m_LFOs.at(0)->tick());
+
+    // Tremelo mix
+    returnSamp = m_tremeloMix * tremeloSamp + (1.0 - m_tremeloMix) * revMixedSamp;
+
+    // return with the goods
     return returnSamp;
 }
 
@@ -499,4 +519,38 @@ void MiSynth::setOscTuning(int oscNum, double oscTuning) {
     for (int i = 0; i < m_numVoices; i++) {
         m_voices.at(i)->setOscTuning(oscNum, oscTuning);
     }
+}
+
+//-----------------------------------------------------------------------------
+// name: setLFOFrequency()
+// desc: set the tuning of the Low Frequency Oscillator (LFO)
+//-----------------------------------------------------------------------------
+void MiSynth::setLFOFrequency(int lfoNum, double freq) {
+    m_LFOs.at(lfoNum)->setFrequency(freq);
+}
+
+//-----------------------------------------------------------------------------
+// name: setLFOWaveShape()
+// desc: set the wave shape for the low frequency oscillators
+//-----------------------------------------------------------------------------
+void MiSynth::setLFOWaveShape(int oscNum, int waveShape) {
+    for (int i = 0; i < m_numLFOs; i++) {
+        m_LFOs.at(i)->setWaveShape(waveShape);
+    }
+}
+
+//-----------------------------------------------------------------------------
+// name: setLFODepth()
+// desc: set the depth of the lfo
+//-----------------------------------------------------------------------------
+void MiSynth::setLFODepth(int lfoNum,StkFloat lfoDepth) {
+    m_LFOs.at(lfoNum)->setVolume(lfoDepth);
+}
+
+//-----------------------------------------------------------------------------
+// name: setTremeloMix()
+// desc: set the mix of the echo
+//-----------------------------------------------------------------------------
+void MiSynth::setTremeloMix(StkFloat tremeloMix) {
+    m_tremeloMix = tremeloMix;
 }
