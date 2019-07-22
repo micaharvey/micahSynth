@@ -385,26 +385,26 @@ int main() {
               case 11: // filter mix
                 g_micahSynth->setFilterMix((StkFloat)(intensity+1) / 130.0);
                 break;
-              case 12: // reverb size
-                reverbSize = intensity / 16 + 0.1;
-                g_micahSynth->setReverbSize(reverbSize);
-                break;
-              case 13: // reverb type
-                reverbType = intensity / 32;
-                g_micahSynth->setReverbType(reverbType);
-                break;
-              case 14: // reverb mix
-                g_micahSynth->setReverbMix((StkFloat)(intensity+1) / 130.0);
-                break;
-              case 15: // echo feedback
+              case 12: // echo feedback
                 g_micahSynth->setEchoFeedback((StkFloat)(intensity+1) / 130.0);
                 break;
-              case 16: // echo length
+              case 13: // echo length
                 echoLength = 44100 * intensity / 128.0;
                 g_micahSynth->setEchoLength(echoLength);
                 break;
-              case 17: // echo mix
+              case 14: // echo mix
                 g_micahSynth->setEchoMix((StkFloat)(intensity+1) / 130.0);
+                break;
+              case 15: // reverb size
+                reverbSize = intensity / 16 + 0.1;
+                g_micahSynth->setReverbSize(reverbSize);
+                break;
+              case 16: // reverb type
+                reverbType = intensity / 32;
+                g_micahSynth->setReverbType(reverbType);
+                break;
+              case 17: // reverb mix
+                g_micahSynth->setReverbMix((StkFloat)(intensity+1) / 130.0);
                 break;
               case 18: // tremelo frequency
                 g_micahSynth->setLFOFrequency(0, 0.25 + LFO_SPEED_MAX * (StkFloat)(intensity+1) / 130.0);
