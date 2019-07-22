@@ -50,6 +50,7 @@ using namespace stk;
 // global variables (good place for changing settings)
 int g_numVoices = NUM_DEFALUT_VOICES;
 StkFloat g_volume = DEFAULT_VOLUME;
+StkFloat g_panMix = 0.1;
 
 // global mod + pitch wheel
 int g_modAmount = 0;
@@ -93,14 +94,20 @@ int audioCallback( void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
   // set samples to point to the beginning of the buffer
   register StkFloat *samples = (StkFloat*) outputBuffer;
   StkFloat tickSamp;
+  StkFloat pan;
 
   // loop over the buffer, ticking the synth each frame
   for (int frameIndex = 0; frameIndex < nBufferFrames; frameIndex++) {
     tickSamp = g_micahSynth->tick();
     tickSamp *= g_volume;
+    pan = 0.5 + 0.5 * g_micahSynth->getStereoPan();
     // duplicate over each channel
     for (int chanIndex = 0; chanIndex < NUM_CHANNELS; chanIndex++){
-      *samples++ = tickSamp;
+      if(chanIndex == 0) {
+        *samples++ = g_panMix * (tickSamp * pan) + (1.0 - g_panMix) * tickSamp;
+      } else {
+        *samples++ = g_panMix * (tickSamp * (1.0 - pan)) + (1.0 - g_panMix) * tickSamp;
+      }
     }
   }
   return 0;
@@ -418,7 +425,16 @@ int main() {
                 g_micahSynth->setLFODepth(0, (StkFloat)(intensity+1) / 130.0);
                 break;
               case 17:
-                g_micahSynth->setTremeloMix((StkFloat)(intensity+1) / 130.0);
+                g_micahSynth->setTremeloMix((StkFloat)(intensity) / 128.0);
+                break;
+              case 18:
+                g_micahSynth->setLFOFrequency(1, 0.25 + LFO_SPEED_MAX * (StkFloat)(intensity+1) / 130.0);
+                break;
+              case 19:
+                g_micahSynth->setLFODepth(1, (StkFloat)(intensity+1) / 130.0);
+                break;
+              case 25:
+                g_panMix = (StkFloat)(intensity) / 128.0;
                 break;
               case 28:
                 g_micahSynth->setFilterMix((StkFloat)(intensity+1) / 130.0);

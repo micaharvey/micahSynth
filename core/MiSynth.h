@@ -128,6 +128,7 @@ public:
     void setLFOWaveShape(int lfoNum, int waveShape);
     void setLFODepth(int lfoNum, StkFloat depth);
     void setTremeloMix(StkFloat tremeloMix);
+    StkFloat getStereoPan();
 
 private:
     int m_numVoices;
