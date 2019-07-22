@@ -338,109 +338,111 @@ int main() {
             knobNumber = (int)message[1];
             intensity  = (int)message[2];
             switch (knobNumber) {
-              case 24:  // filter resonance
-                resonance = (StkFloat)((intensity+1)/ 130.0 );
-                g_micahSynth->setFilter(cutoff, resonance);
+              case 0: // top left does nothing (consider octave or vibrato or nHarmonics)
                 break;
-              case 29:  // mod wheel, filter cutoff
-                cutoff = (StkFloat)( 20.0 + intensity * 10000.0 / 128.0 );
-                g_micahSynth->setFilter(cutoff, resonance);
-                break;
-              case 0:
-                break;
-              case 3:
-                tune = 0.5 + 1.5 * (intensity / 127.0);
-                g_micahSynth->setOscTuning(1, tune);
-                break;
-              case 6:
-                tune = 0.5 + 1.5 * (intensity / 127.0);
-                g_micahSynth->setOscTuning(2, tune);
-                break;
-              case 1:
+              case 1: // osc 1 wave shape
                 waveShape = intensity / 32;
                 g_micahSynth->setWaveShape(0, waveShape);
                 break;
-              case 4:
+              case 2: // osc 1 volume
+                g_micahSynth->setOscVolume(0, ((StkFloat)(intensity+1) / 130.0));
+                break;
+              case 3: // osc 2 tuning
+                tune = 0.5 + 1.5 * (intensity / 127.0);
+                g_micahSynth->setOscTuning(1, tune);
+                break;
+              case 4: // osc 2 wave shape
                 waveShape = intensity / 32;
                 g_micahSynth->setWaveShape(1, waveShape);
                 break;
-              case 7:
+              case 5: // osc 2 volume
+                g_micahSynth->setOscVolume(1, ((StkFloat)(intensity+1) / 130.0));
+                break;
+              case 6: // osc 3 tuning
+                tune = 0.5 + 1.5 * (intensity / 127.0);
+                g_micahSynth->setOscTuning(2, tune);
+                break;
+              case 7: // osc 3 wave shape
                 waveShape = intensity / 32;
                 g_micahSynth->setWaveShape(2, waveShape);
                 break;
-              case 21:
+              case 8: // osc 3 volume
+                g_micahSynth->setOscVolume(2, ((StkFloat)(intensity+1) / 130.0));
+                break;
+              case 9: // filter cutoff
+                cutoff = (StkFloat)( 20.0 + intensity * 10000.0 / 128.0 );
+                g_micahSynth->setFilter(cutoff, resonance);
+                break;
+              case 10: // filter resonance
+                resonance = (StkFloat)((intensity+1)/ 130.0 );
+                g_micahSynth->setFilter(cutoff, resonance);
+                break;
+              case 11: // filter mix
+                g_micahSynth->setFilterMix((StkFloat)(intensity+1) / 130.0);
+                break;
+              case 12: // reverb size
+                reverbSize = intensity / 16 + 0.1;
+                g_micahSynth->setReverbSize(reverbSize);
+                break;
+              case 13: // reverb type
+                reverbType = intensity / 32;
+                g_micahSynth->setReverbType(reverbType);
+                break;
+              case 14: // reverb mix
+                g_micahSynth->setReverbMix((StkFloat)(intensity+1) / 130.0);
+                break;
+              case 15: // echo feedback
+                g_micahSynth->setEchoFeedback((StkFloat)(intensity+1) / 130.0);
+                break;
+              case 16: // echo length
+                echoLength = 44100 * intensity / 128.0;
+                g_micahSynth->setEchoLength(echoLength);
+                break;
+              case 17: // echo mix
+                g_micahSynth->setEchoMix((StkFloat)(intensity+1) / 130.0);
+                break;
+              case 18: // tremelo frequency
+                g_micahSynth->setLFOFrequency(0, 0.25 + LFO_SPEED_MAX * (StkFloat)(intensity+1) / 130.0);
+                break;
+              case 19: // tremelo depth
+                g_micahSynth->setLFODepth(0, (StkFloat)(intensity+1) / 130.0);
+                break;
+              case 25: // tremelo mix
+                g_micahSynth->setTremeloMix((StkFloat)(intensity) / 128.0);
+                break;
+              case 20: // stereo pan frequency
+                g_micahSynth->setLFOFrequency(1, 0.25 + LFO_SPEED_MAX * (StkFloat)(intensity+1) / 130.0);
+                break;
+              case 26: // stereo pan depth
+                g_micahSynth->setLFODepth(1, (StkFloat)(intensity+1) / 130.0);
+                break;
+              case 21: // stereo pan mix
+                g_panMix = (StkFloat)(intensity) / 128.0;
+                break;
+              case 22: // Attack
                 A = (StkFloat)(intensity+1) / 130.0;
                 A *= A;
                 g_micahSynth->setADSR(A, D, S, R);
                 break;
-              case 22:
+              case 23: // Delay
                 D = (StkFloat)(intensity+1) / 130.0;
                 D *= D;
                 g_micahSynth->setADSR(A, D, S, R);
                 break;
-              case 26:
-                S = (StkFloat)(intensity+1) / 130.0;
-                S *= S;
-                g_micahSynth->setADSR(A, D, S, R);
-                break;
-              case 23:
+              case 24: // Release
                 R = (StkFloat)(intensity+1) / 130.0;
                 R *= R;
                 g_micahSynth->setADSR(A, D, S, R);
                 break;
-              case 2:
-                g_micahSynth->setOscVolume(0, ((StkFloat)(intensity+1) / 130.0));
-                break;
-              case 5:
-                g_micahSynth->setOscVolume(1, ((StkFloat)(intensity+1) / 130.0));
-                break;
-              case 8:
-                g_micahSynth->setOscVolume(2, ((StkFloat)(intensity+1) / 130.0));
-                break;
-              case 11:
-                g_micahSynth->setReverbMix((StkFloat)(intensity+1) / 130.0);
-                break;
-              case 10:
-                reverbType = intensity / 32;
-                g_micahSynth->setReverbType(reverbType);
-                break;
-              case 9:
-                reverbSize = intensity / 16 + 0.1;
-                g_micahSynth->setReverbSize(reverbSize);
-                break;
-              case 12:
-                g_micahSynth->setEchoFeedback((StkFloat)(intensity+1) / 130.0);
-                break;
-              case 13:
-                echoLength = 44100 * intensity / 128.0;
-                g_micahSynth->setEchoLength(echoLength);
-                break;
-              case 14:
-                g_micahSynth->setEchoMix((StkFloat)(intensity+1) / 130.0);
-                break;
-              case 15:
-                g_micahSynth->setLFOFrequency(0, 0.25 + LFO_SPEED_MAX * (StkFloat)(intensity+1) / 130.0);
-                break;
-              case 16:
-                g_micahSynth->setLFODepth(0, (StkFloat)(intensity+1) / 130.0);
-                break;
-              case 17:
-                g_micahSynth->setTremeloMix((StkFloat)(intensity) / 128.0);
-                break;
-              case 18:
-                g_micahSynth->setLFOFrequency(1, 0.25 + LFO_SPEED_MAX * (StkFloat)(intensity+1) / 130.0);
-                break;
-              case 19:
-                g_micahSynth->setLFODepth(1, (StkFloat)(intensity+1) / 130.0);
-                break;
-              case 25:
-                g_panMix = (StkFloat)(intensity) / 128.0;
-                break;
-              case 28:
-                g_micahSynth->setFilterMix((StkFloat)(intensity+1) / 130.0);
-                break;
-              case 27:
+              case 27: // master volume top right
                 g_volume = (StkFloat)(intensity+1) / 130.0;
+              case 28: // Sustain (out of order to be replaced by slider)
+                S = (StkFloat)(intensity+1) / 130.0;
+                S *= S;
+                g_micahSynth->setADSR(A, D, S, R);
+                break;
+              case 29: // bottom right not used
+                break;
               default:
                 break;
               }
