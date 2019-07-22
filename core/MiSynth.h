@@ -16,6 +16,7 @@
 #include "NRev.h"
 #include "Echo.h"
 #include "x-fun.h"
+#include <math.h>
 
 using namespace stk;
 
