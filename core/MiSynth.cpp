@@ -554,3 +554,11 @@ void MiSynth::setLFODepth(int lfoNum,StkFloat lfoDepth) {
 void MiSynth::setTremeloMix(StkFloat tremeloMix) {
     m_tremeloMix = tremeloMix;
 }
+
+//-----------------------------------------------------------------------------
+// name: getStereoPan()
+// desc: get the stereo pan from LFO 2
+//-----------------------------------------------------------------------------
+StkFloat MiSynth::getStereoPan() {
+    return m_LFOs.at(1)->tick();
+}
