@@ -144,6 +144,7 @@ int main() {
   int knobNumber = 0;
   int waveShape = 0;
   int reverbType = 0;
+  int nHarmonics = 0;
   StkFloat reverbSize = 0;
   unsigned long echoLength = 0;
   double tune = 1.0;
@@ -338,7 +339,11 @@ int main() {
             knobNumber = (int)message[1];
             intensity  = (int)message[2];
             switch (knobNumber) {
-              case 0: // top left does nothing (consider octave or vibrato or nHarmonics)
+              case 0: // set n Harmonics for BLIT saw and square
+                if ( nHarmonics != intensity / 8 ) {
+                  nHarmonics = intensity / 8;
+                  g_micahSynth->setNHarmonics(nHarmonics);
+                }
                 break;
               case 1: // osc 1 wave shape
                 waveShape = intensity / 32;

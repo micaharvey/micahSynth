@@ -48,9 +48,11 @@ public:
     void setVolume(StkFloat volume);
     void setFrequency(double freq);
     void setTuning(StkFloat oscTuning);
+    void setNHarmonics(int nHarmonics);
 
 private:
     int m_waveShape;
+    int m_nHarmonics;
     StkFloat m_oscVolume;
     double m_tune;
     double m_freq;
@@ -80,12 +82,14 @@ public:
     void setWaveShape(int oscNum, int waveShape);
     void setOscVolume(int oscNum, StkFloat volume);
     void setOscTuning(int oscNum, double oscTuning);
+    void setNHarmonics(int nHarmonics);
     int getNote();
 
 private:
     int m_note;
     bool m_playing;
     int m_numOscillators;
+    int m_nHarmonics;
     std::vector<MiOsc*> m_oscillators;
     double m_freqRangeLow;
     double m_freqRangeHigh;
@@ -128,6 +132,7 @@ public:
     void setLFOWaveShape(int lfoNum, int waveShape);
     void setLFODepth(int lfoNum, StkFloat depth);
     void setTremeloMix(StkFloat tremeloMix);
+    void setNHarmonics(int nHarmonics);
     StkFloat getStereoPan();
 
 private:
@@ -146,6 +151,7 @@ private:
     JCRev m_jcRev;
     FreeVerb m_freeRev;
     int m_reverbType;
+    int m_nHarmonics;
     StkFloat m_reverbSize;
     Echo m_echo1;
     Echo m_echo2;
