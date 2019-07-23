@@ -415,13 +415,13 @@ int main() {
               case 25: // tremelo mix
                 g_micahSynth->setTremeloMix((StkFloat)(intensity) / 128.0);
                 break;
-              case 20: // stereo pan frequency
+              case 21: // stereo pan frequency
                 g_micahSynth->setLFOFrequency(1, 0.25 + LFO_SPEED_MAX * (StkFloat)(intensity+1) / 130.0);
                 break;
               case 26: // stereo pan depth
                 g_micahSynth->setLFODepth(1, (StkFloat)(intensity+1) / 130.0);
                 break;
-              case 21: // stereo pan mix
+              case 20: // stereo pan mix
                 g_panMix = (StkFloat)(intensity) / 128.0;
                 break;
               case 22: // Attack
