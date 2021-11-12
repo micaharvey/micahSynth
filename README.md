@@ -1,6 +1,9 @@
 # micahSynth
 Software Synthesizer developed by Micah.  It is a MIDI controlled 8 voice polyphonic soft synth.
 
+# Privacy Policy
+I do not collect any of your data from this app.  You have complete privacy.
+
 Signal Flow:
 > OSC -> ADSR -> Filter
 
